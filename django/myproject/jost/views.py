@@ -47,7 +47,6 @@ class index_form(forms.Form):
 														widget=forms.TextInput(attrs={'size':'8'}))
 
 
-
 def index(request):
 	if request.method == 'POST':
 		form = index_form(request.POST, auto_id=False)
@@ -62,6 +61,8 @@ def index(request):
 			fstat_est_url = jost_results[2][1]
 			bootstrap_url = jost_results[2][2]
 			matrix_url = jost_results[2][3]
+			Dest_hmean = jost_results[3]
+			dest_matrix_url = jost_results[2][4]
 			
 			return render_to_response('jost/index.html',{'form':form, 
 														'fstat':fstat, 
@@ -72,12 +73,12 @@ def index(request):
 														'fstat_est_url':fstat_est_url,
 														'bootstrap_url':bootstrap_url,
 														'matrix_url':matrix_url,
+														'Dest_hmean':Dest_hmean,
+														'dest_matrix_url':dest_matrix_url
 														})
-
 		else:
 			form = index_form(auto_id=False)
 			return render_to_response('jost/index.html',{'form':form})
-	
 	else:
 		form = index_form(auto_id=False)
 		return render_to_response('jost/index.html',{'form':form})

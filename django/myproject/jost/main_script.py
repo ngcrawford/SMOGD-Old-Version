@@ -12,6 +12,7 @@ import re
 from Jost_Stats_Calc import *
 from bootstrap import Bootstrap
 import genotype_file_parsers as gfp
+import pprint as pp
 
 
 def main(data, numb_of_replicates,):	
@@ -40,6 +41,7 @@ def main(data, numb_of_replicates,):
 	if file_info[1] == 'unknown':
 		processed_data = gfp.genepop_parser(lines)
 	
+	print processed_data
 	# process data, etc.
 	empty_dict = create_empty_dictionaries_of_unique_alleles(processed_data)  # create empty dictionaries of alleles in each locus
 	
@@ -49,16 +51,26 @@ def main(data, numb_of_replicates,):
 	
 	frequencies = generate_frequencies(processed_data, allele_counts)
 	
+	pp.pprint(frequencies)
+	
 	results = fstats(frequencies, processed_data[1], processed_data[0], population_sizes)
+	
+	mean_D = mean_D_across_loci(results[1])
 	
 	bootstrap_results = Bootstrap(processed_data, numb_of_replicates)
 	
 	pairwise_stats = generate_pairwise_stats(processed_data[0], processed_data[1], processed_data[2])
 	
+	
 	# create urls and files:
 	fstats_url = update_csv_file('fstats',results[0])
-	fstats_est_url = update_csv_file('est_stats',results[1])
-	bootstrap_url = update_csv_file('bootstrap_results',bootstrap_results)
-	matrix_url = update_csv_file('pairwise_matrices',pairwise_stats)
 	
-	return (results, bootstrap_results, (fstats_url,fstats_est_url,bootstrap_url, matrix_url))
+	fstats_est_url = update_csv_file('est_stats',results[1])
+	
+	bootstrap_url = update_csv_file('bootstrap_results',bootstrap_results)
+	
+	matrix_url = update_csv_file('pairwise_matrices',pairwise_stats[0])
+	
+	dest_matrix_url = update_csv_file('dest_matrices',pairwise_stats[1])
+	
+	return (results, bootstrap_results, (fstats_url,fstats_est_url,bootstrap_url, matrix_url, dest_matrix_url), mean_D)

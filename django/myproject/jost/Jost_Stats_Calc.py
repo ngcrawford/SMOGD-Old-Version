@@ -12,8 +12,8 @@ from scipy import stats
 from copy import deepcopy
 import time
 import csv
-# import pprint
-# pp = pprint.PrettyPrinter(indent=4)
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 def create_empty_dictionaries_of_unique_alleles(processed_data):
 	""" indentify all unique alleles in each locus in all populations
@@ -88,6 +88,7 @@ def generate_frequencies(processed_data, allele_counts):
 def generate_allele_frequencies(locus, pop_names, allele_counts):
 	"""Get allele frequencies for each locus. Each column is a population. Each row is an allele."""
 	pops_locus = sorted(allele_counts.keys())	# does this work with missing data?
+	
 	locus_list = []
 	for pl in pops_locus:
 		p_l = pl.split('||')				# split binomial names
@@ -97,12 +98,17 @@ def generate_allele_frequencies(locus, pop_names, allele_counts):
 			total_sum = sum(allele_counts[pl].values())		# get total sum
 			allele_ids = sorted(allele_counts[pl].keys())	# this is a bit slow...
 			for allele_id in allele_ids:
-				allele_freqs.append(allele_counts[pl][allele_id]/float(total_sum))
+			
+				if total_sum == 0:						# recently changed to prevent float division
+					allele_freqs.append(0.0)			
+				else:
+					allele_freqs.append(allele_counts[pl][allele_id]/float(total_sum))
 			locus_list.append(allele_freqs)
 	locus_list = array(locus_list)
 	return locus_list
 
 def generate_population_sizes(processed_data, population_names, loci_names ):
+
 	# make empty locus dictinoary with empty lists
 	locus_size_dict = {}
 	for locus in loci_names:
@@ -167,6 +173,7 @@ def fstats(locus_by_pop_freqs, population_names, loci_names, population_sizes):
 		return Hs
 
 	def calc_harmonic_mean(population_sizes):
+		print population_sizes
 		"""calculates harmonic mean from list of integers"""
 		n = len(population_sizes)
 		denominator = 0
@@ -218,22 +225,71 @@ def fstats(locus_by_pop_freqs, population_names, loci_names, population_sizes):
 		est_results.append([Locus, N_harmonic, Hs_est, Ht_est, G_est, G_Hedrick, D_est])
 		locus_counter += 1
 	
-	print est_results
-	
-	for result in est_results:
-		print result[6]
 	return (basic_results, est_results)
+	
+def mean_D_across_loci(results):
+	"""Calculate the Harmonic mean of Dest across loci"""
+	
+	
+	# H appoximated by 1/[(1/A)+var(D)(1/A)**3] 
+	
+	def approximate_hmean(dest_values):
+		A = stats.mean(dest_values)
+		varD = stats.var(dest_values)
+		h_mean = 1/((1/A)+(varD)*pow((1/A),3))
+		return h_mean
+	
+	
+	Dest_list = []
+	for result in results:
+		Dest = result[6]
+		Dest_list.append(Dest)
+		
+	Dest_hmean = approximate_hmean(Dest_list)
+	return Dest_hmean
+
+def make_Dest_matrices(data, numb_pops, population_names):
+	""" make matrix list of lists ready for csv printer"""
+	
+	def set_to_blank(item):
+		item = "--"
+		return item
+		
+	matrix = []
+
+	for i in range(numb_pops):
+	
+		z = numb_pops - i -1
+		
+		temp = [item for index, item in enumerate(data) if index < z]
+
+		# add blanks: '--'
+		x = range(numb_pops - len(temp))
+		blanks = map(set_to_blank, x) 
+		blanks = [population_names[i]] + blanks
+		
+		temp = blanks + temp
+		matrix.append(temp)
+		
+		# update data
+		data = data[z:]
+	header_row = [["--"] + population_names]	
+	matrix = header_row + matrix
+	return matrix
+
+	
+
 	
 def generate_pairwise_stats(loci_names,population_names,populations):
 	""" generates a pairswise distance matices of G_est, G_Hedrick (G'st) and Dest for each locus"""
-	
+		
 	counter = 0
 	list_of_rows = []
 	list_of_dicts = []
 	pop_len = len(populations)
 	
 	est_parameters = {'G_est':[], 'G_Hedrick':[], 'D_est':[]}
-
+	pairwise_dest = []
 	dict_pairwise_tables = {}
 	for locus in loci_names:
 		dict_pairwise_tables[locus] = deepcopy(est_parameters)			# deep copy is key!
@@ -254,18 +310,22 @@ def generate_pairwise_stats(loci_names,population_names,populations):
 				population_sizes = generate_population_sizes(processed_data[2], processed_data[1], processed_data[0])		# dictionary of population sizes
 				frequencies = generate_frequencies(processed_data, allele_counts)
 				results = fstats(frequencies, processed_data[1], processed_data[0], population_sizes)
-				# print pop_duo_names, results[1]
-
+				mean_D = mean_D_across_loci(results[1])
+				pairwise_dest.append(mean_D)
+				
+				
 				for locus in results[1]:
 					current_multi_row[locus[0]]['G_est'].append(locus[4])
 					current_multi_row[locus[0]]['G_Hedrick'].append(locus[5])
 					current_multi_row[locus[0]]['D_est'].append(locus[6])
 
 				counter_2 += 1
+				
 			list_of_dicts.append(current_multi_row)
-
 		counter +=1	
-
+		
+	Dest_matrices = make_Dest_matrices(pairwise_dest, pop_len, population_names)
+	
 	pop_len = len(population_names)
 
 	# make the top row of the matirx
@@ -301,13 +361,14 @@ def generate_pairwise_stats(loci_names,population_names,populations):
 					pop_matices_ready_for_csv.append(final_row)
 				counter += 1
 
-	return tuple(pop_matices_ready_for_csv)
+	return (pop_matices_ready_for_csv,Dest_matrices)
+
 
 def update_csv_file(header,data):
 	timestamp = time.localtime()
 	timestamp = "%s%s%s%s%s%s%s%s%s" % timestamp[:]  # (2009, 4, 17, 13, 57, 28, 4, 107, 1)
-	filename = '/home/ngcrawford/webapps/web_media/temp_files/'+header+'_'+ timestamp +'.txt'
-	#filename = '/Users/nick/Web_Design/django_templates/media/temp_files/'+header+'_'+ timestamp +'.csv'  # uncomment for online
+	#filename = '/home/ngcrawford/webapps/web_media/temp_files/'+header+'_'+ timestamp +'.txt'
+	filename = '/Users/nick/Web_Design/django_templates/media/temp_files/'+header+'_'+ timestamp +'.csv'  # uncomment for online
 	filename = '/Users/nick/Web_Design/django_templates/media/temp_files/'+header+'_'+ timestamp +'.txt'	# local
 	url = '/web_media/temp_files/'+header+'_'+ timestamp +'.txt'
 	data_writer = csv.writer(open(filename, 'w'), delimiter='\t', quotechar='|')

@@ -115,6 +115,7 @@ def genepop_parser(lines):
 	# GenePop Format Test
 	if pattern.match(lines[2]):						# assumes multiple populations...
 		loci_names = loci_punct.split(lines[1])
+		
 		loci_on_multiple_lines = False
 	
 	for line in lines[1:]:							# skip header line
@@ -127,6 +128,7 @@ def genepop_parser(lines):
 				line_parts = line.split(',')						# split line with populations
 				loci = line_parts[1].strip()						# id loci
 				loci_list.append(loci.split())						# add loci to loci list
+				
 		
 		# FLAG POPULATION AND UPDATE STORAGE LIST (All_Loci)
 		if line_match:				# Flag Pops
@@ -145,6 +147,7 @@ def genepop_parser(lines):
 		line_counter += 1
 			
 	all_loci.append(loci_list)			# add last set of locus to all_loci
+	
 	return [loci_names, population_names, all_loci]
 
 def unique_alleles_per_locus(loci):
@@ -195,6 +198,24 @@ def population_parser(population,unique_alleles):
 	final_array = array(final_array)
 	return final_array
 
+def error_testing(file_string):
+	numb_of_loci = len(file_string[0])
+	numb_of_pops = len(file_string[1])
+
+	error = [0]
+	pop_count = 0
+	for pop in file_string[2]:
+		pop_count += 1
+		
+		if numb_of_loci != shape(pop)[1]:
+			error.append('incorrrect number of loci in pop # '+ str(pop_count))
+	
+	if numb_of_pops != pop_count:
+		error.append('incorrect number of populations')
+	
+	return error
+	
+
 def determine_file_type(file_string):
 	"""docstring for determine_file_type"""
 	os = ""
@@ -211,6 +232,23 @@ def determine_file_type(file_string):
 	# DETERMINE FILE FORMAT
 	if file_string.find('[Profile]') != -1:  # [Profile] is only found in the first line of Arlequin files
 		file_format = 'Arlequin'
-		
+
 	return (os, file_format)
 
+def main():
+	
+	# testing out the error_testing function
+	
+	fin = open('genepop_test_file.txt', 'r')
+	line_list = [] 
+	for line in fin:
+		line_list.append(line.strip())
+	
+	parsed_data = genepop_parser(line_list)
+	print error_testing(parsed_data)	
+	
+
+
+
+if __name__ == '__main__':
+	main()

@@ -53,7 +53,7 @@
 	<div class = "container">  <!-- showgrid" -->
 		<hr />
 		<div id = "header"  class = "span-21">
-			<h1>SMOGD: Software for the Measurement of Genetic Diversity (<i>vsn. 1.2.2</i>)</h1>
+			<h1>SMOGD: Software for the Measurement of Genetic Diversity (<i>vsn. 1.2.5</i>)</h1>
 		</div>
 		<div id = "subheader"  class = "span-23 ">
 			<h3 class="alt">Calculates the new measures of genetic differentiation described in Jost 2008 and Hedrick 2005</h3>
@@ -122,6 +122,16 @@
 						<div class="span-2 last">{{row|slice:"6:7"|join:""|floatformat:3}}</div> 
 					</div>
 				{% endfor %}
+				<div class = "span-23 ">
+					<div class="span-3">&#209; of Loci</div>
+					<div class="span-2">--</div>
+					<div class="span-2">--</div>
+					<div class="span-2">--</div>
+					<div class="span-2">--</div>
+					<div class="span-2">--</sub></div>
+					<div class="span-2 top_border last">{{Dest_hmean|floatformat:3}}</div>
+				</div>
+				
 			<div class = "span-23 prepend-top ">
 			Download results as a tab delimited file: 
 			<a href={{fstat_est_url}} type='text/csv'>[table]</a>
@@ -135,19 +145,21 @@
 						<div class = "span-23 ">
 							<div class="span-3">Locus ID</div>
 							<div class="span-4">Diversity Parameter</div>
-							<div class="span-4">Bootstrapped Est.</div>
-							<div class="span-4">Variance</div>
-							<div class="span-4 last">Std. Error</div>
+							<div class="span-3">Bootstrapped Est.</div>
+							<div class="span-3">Variance</div>
+							<div class="span-3">Std. Error</div>
+							<div class="span-3">95 % CI Min</div>
+							<div class="span-3 last">95% CI Max</div>
 						</div>
 					</b>
 						{% for row in bootstrap_est %}
 							<div class="span-23 ">
 								<div class="span-3">{{row|first}}</div>
 								<div class="span-4">{{row|slice:"1:2"|join:""}}</div>
-								{% for datum in row|slice:"2:4" %}
-									<div class="span-4">{{datum|floatformat:3}}</div>
+								{% for datum in row|slice:"2:6" %}
+									<div class="span-3">{{datum|floatformat:3}}</div>
 								{% endfor %}
-								<div class="span-4 last">{{row|slice:"4:5"|join:""|floatformat:3}}</div> 
+								<div class="span-3 last">{{row|slice:"6:7"|join:""|floatformat:3}}</div> 
 							</div>
 						{% endfor %}
 					<div class = "span-23 prepend-top">
@@ -164,8 +176,12 @@
 			<div class = "span-11 ">
 				<p>
 					There's no html output because the number of columns is dependent on the number
-					of loci, but a tab delimited file of pairwise distances may be downloaded here:
+					of loci, but a tab delimited file of pairwise distances for each locus may be downloaded here:
 					<a href={{matrix_url}} type='text/csv'>[table]</a>
+				</p>
+				<p> 
+					A separate table of the harmonic mean of D<sub>est</sub> across loci may be
+					downloaded here: <a href={{dest_matrix_url}} type='text/csv'>[table]</a> 
 				</p>
 			</div>
 		<hr />
@@ -187,12 +203,40 @@
 				<div id = 'news-header'>				
 				<h4>Recent News:</h4>
 				<p class="notice">
-					Update (<i>5/6/09</i>), v1.2.2 :
-					Arlequin genotypic format is now accepted.
+					Update (<i>8/3/09</i>), v1.2.5:
+					Pairwise calculations across loci are here! Sorry for the delay.  I've been busy abroad and in the lab. Ugh. I also
+					added bootstrap calculations of 95% confidence intervals and updated the user manual.
+					<br></br><br></br>
+					I just updated the harmonic mean calculation for combining D<sub>est</sub> values to include Anne Chao's approximation. 
+					<br></br><br></br>
+					Hmean = 1/[(1/A)+var(D)(1/A)^3] where A is the arithmetic mean and var(D) is the variance of D<sub>est</sub> values.
+					<br></br><br></br>
+					More details here: <a href = 'http://network.nature.com/groups/popgen/forum/topics/4220?page=6#reply-14305'>[link]</a> 
+					
+					
 					<span class = 'expand' id = 'expand-down'><i> --- <b>more</b></i><span class = 'ss_sprite ss_bullet_arrow_down'></span></span>		
 				</p>
+				
 				</div>
-				<div id = 'news'>								{# java script looks for this <div> to determine what to hide #}
+				<div id = 'news'>
+				<p class="notice">
+					Update (<i>6/24/09</i>), v1.2.4:
+					The harmonic mean is calculated across loci for each population.  I'll be implementing similar pairwise calculations in the next couple of days (<i>e.g.</i>, the harmonic mean of all loci for each possible pair of populations).
+					
+					<span class = 'expand' id = 'expand-down'><i> --- <b>more</b></i><span class = 'ss_sprite ss_bullet_arrow_down'></span></span>		
+				</p>
+				<p class="notice">
+					Update (<i> ~ 5/15/09</i>), v1.2.3:
+					Fixed a bug that resulting in improper delineation of populations due to truncation of population names
+				</p>
+
+				
+				<p class="notice">
+					Update (<i>5/6/09</i>), v1.2.2:
+					Arlequin genotypic format is now accepted.
+			
+				</p>
+								{# java script looks for this <div> to determine what to hide #}
 				<p class="notice">
 					Update (<i>5/5/09</i>):
 					<br></br>									{# not ideal way to deal with HTML #}
@@ -250,7 +294,7 @@
 				</p>
 				<h4>FAQ:</h4>
 				<p>
-				A user manual can be downloaded here: <a href="/web_media/images/manual_v1.pdf">[manual]</a>
+				A user manual can be downloaded here: <a href="/web_media/images/SMOGD_User_Manual_vsn25.pdf">[manual]</a>
 				</p>
 
 				<h4>How to Cite:</h4>
@@ -264,7 +308,6 @@
 				Mathematics in Science and Engineering, vol. 115, Academic Press, New York, 
 				San Francisco, London, 1975, xii + 234 pp.
 				<a href = "http://projecteuclid.org/euclid.bams/1183538665">[link to review]</a>
-				<span id = 'cite-expand' class = 'ss_sprite ss_bullet_arrow_down'></span>
 				</p>
 				
 				<div id ='citations'>
@@ -355,7 +398,7 @@
 				well as a few other modifications to the formulae (see Jost 2008, pg. 4022) They should better account for small sample sizes.
 				</p>
 				<p>
-				Note: it's possible to get negative values for G<sub>ST_est</sub>, G'<sub>ST_est</sub>, and D<sub>est</sub> if 
+				Note: it's possible to get <b>negative values</b> for G<sub>ST_est</sub>, G'<sub>ST_est</sub>, and D<sub>est</sub> if 
 				you are comparing populations with virtually identical gene frequencies. Try not to panic. You may just want to 
 				report these values as zero.
 				</p>

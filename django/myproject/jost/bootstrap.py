@@ -90,6 +90,12 @@ def Create_Bootstrap_Replicate(data):
 	return result
 	
 def Bootstrap(processed_data, numb_of_replicates):
+
+	if numb_of_replicates == 0:
+		bootstrap_results = []
+		return bootstrap_results
+
+	initial_numb_of_replicates = copy(numb_of_replicates)
 	bootstrap_results = []
 	Dest_storage_list = []
 	empty_dict = create_empty_dictionaries_of_unique_alleles(processed_data)
@@ -105,7 +111,7 @@ def Bootstrap(processed_data, numb_of_replicates):
 	while numb_of_replicates != 0:
 		# 1. create replicate
 		replicate = Create_Bootstrap_Replicate(processed_data)
-		# 2. get measurements from replicat
+		# 2. get measurements from replicate
 		allele_counts = generate_allele_counts(replicate[0], replicate[1], replicate[2], empty_dict)
 		population_sizes = generate_population_sizes(replicate[2], replicate[1], replicate[0])
 		frequencies = generate_frequencies(replicate, allele_counts)
@@ -126,8 +132,16 @@ def Bootstrap(processed_data, numb_of_replicates):
 	for locus in processed_data[0]:
 		for parameter in ['Hs_est', 'Ht_est', 'G_est', 'G_Hedrick', 'D_est']:
 			bootstrapped_parameters = locus_dict[locus][parameter]
-			bootstrap_results.append([locus, parameter, np.mean(bootstrapped_parameters), np.var(bootstrapped_parameters), sp.stats.sem(bootstrapped_parameters)])
+			# calculate C.I @ 95% cutoff
+			
+			sorted_bootstrapped_parameters = np.sort(bootstrapped_parameters)
+			min_five_percent = int(abs(initial_numb_of_replicates*.04))
+			max_five_percent = int(abs(initial_numb_of_replicates*.96))
+			min_CI = sorted_bootstrapped_parameters[min_five_percent]
+			max_CI = sorted_bootstrapped_parameters[max_five_percent]
+			
+			bootstrap_results.append([locus, parameter, np.mean(bootstrapped_parameters), np.var(bootstrapped_parameters), sp.stats.tsem(bootstrapped_parameters), min_CI, max_CI])
 	return bootstrap_results
 
-Bootstrap(processed_data, 3)
+Bootstrap(processed_data, 100)
 
