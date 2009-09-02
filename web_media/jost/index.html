@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+
+	<link rel="stylesheet" href="/web_media/css/blueprint/screen.css" type="text/css" media="screen, projection"/>
+	<link rel="stylesheet" href="/web_media/css/blueprint/print.css" type="text/css" media="print"/>   
+	<!--[if IE]><link rel="stylesheet" href="/media/css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+	<link rel="stylesheet" href="/web_media/css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection"/> 
+	<link rel="stylesheet" href="/web_media/css/blueprint/plugins/tabs/screen.css" type="text/css" media='screen'/>
+	<link rel="stylesheet" href="/web_media/css/blueprint/plugins/sprites/sprite.css" type="text/css" media='screen'/>
+	<link rel="stylesheet" href="/web_media/css/jost.css" type="text/css" media="screen"/>
+
+
+	<!-- End of Style Sheets -->
+
+	<script type="text/javascript" src="/web_media/js/jquery.js"></script> 
+	
+	{# SCRIPT FOR GOOGLE ANALYTICS #}
+	<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	<script type="text/javascript">
+	try {
+	var pageTracker = _gat._getTracker("UA-7515991-1");
+	pageTracker._trackPageview();
+	} catch(err) {}</script>
+	
+	{#  EXPAND AND CONTRACT NEWS SECTION #}
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$("#news").hide();						// hides news and expand up link so they can be revealed later
+		$('#expand-up').hide();					//    also sets up proper toggle logic
+		$(".expand").click(function(){
+		  $("#news").slideToggle("slow");
+		  $('#expand-down').toggle(); 			// turn off plus (default is on in CSS)
+		  $('#expand-up').toggle();				// turn on minus (default is off)
+		  
+		});
+	});
+	</script>
+	
+
+	<meta name="author" content="Nicholas Crawford"></meta>
+	<title>SMOGD</title>
+</head>
+
+
+<body>
+	<div class = "container">  <!-- showgrid" -->
+		<hr />
+		<div id = "header"  class = "span-21">
+			<h1>SMOGD: Software for the Measurement of Genetic Diversity (<i>vsn. 1.2.2</i>)</h1>
+		</div>
+		<div id = "subheader"  class = "span-23 ">
+			<h3 class="alt">Calculates the new measures of genetic differentiation described in Jost 2008 and Hedrick 2005</h3>
+		</div>
+		<hr />
+
+		
+		
+		{% if fstat %}
+			<div class = "span-23">
+				<h2>Results: </h2>
+			</div>
+			<hr />
+			<div class = "span-23">
+				<h3>Basic Parameters:</h3>
+			</div>
+			<b>
+				<div class="span-23">
+					<div class="span-3">Locus ID</div>
+					<div class="span-2">n</div>
+					<div class="span-2">H<sub>S</sub></div>
+					<div class="span-2">H<sub>T</sub></div>
+					<div class="span-2">D<sub>ST</sub></div>
+					<div class="span-2">G<sub>ST</sub></div>
+					<div class="span-2">H<sub>ST</sub></div>
+					<div class="span-2">&#916;<sub>ST</sub></div>
+					<div class="span-2">D</div>
+					<div class="span-2">H<sub>S</sub>/H<sub>T</sub></div>
+					<div class="span-2 last">&#916;<sub>S</sub>/&#916;<sub>T</sub></div>
+				</div>
+			</b>
+				{% for row in fstat %}
+					<div class="span-23">
+						<div class="span-3">{{row|first}}</div>
+						{% for datum in row|slice:"1:10" %}
+							<div class="span-2">{{datum|floatformat:3}}</div>
+						{% endfor %}
+						<div class="span-2 last">{{row|slice:"10:11"|join:""|floatformat:3}}</div> 
+						</div>
+				{% endfor %}
+			<div class = "span-23 prepend-top">
+			Download results as a tab delimited file: 
+			<a href={{fstat_url}} type='text/csv'>[table]</a>
+			</div>
+			<hr />
+			<div class = "span-23 ">
+				<h3>Estimated Parameters:</h3>
+			</div>
+			<b>
+				<div class = "span-23 ">
+					<div class="span-3">Locus ID</div>
+					<div class="span-2">&#209;</div>
+					<div class="span-2">H<sub>S_est</sub></div>
+					<div class="span-2">H<sub>T_est</sub></div>
+					<div class="span-2">G<sub>ST_est</sub></div>
+					<div class="span-2">G'<sub>ST_est</sub></div>
+					<div class="span-2 last">D<sub>est</sub></div>
+				</div>
+			</b>
+				{% for row in fstat_est %}
+					<div class="span-23 ">
+						<div class="span-3">{{row|first}}</div>
+						{% for datum in row|slice:"1:6" %}
+							<div class="span-2">{{datum|floatformat:3}}</div>
+						{% endfor %}
+						<div class="span-2 last">{{row|slice:"6:7"|join:""|floatformat:3}}</div> 
+					</div>
+				{% endfor %}
+			<div class = "span-23 prepend-top ">
+			Download results as a tab delimited file: 
+			<a href={{fstat_est_url}} type='text/csv'>[table]</a>
+			</div>
+			{% ifnotequal numb_of_replicates 0 %}
+				<hr />
+				<div class = "span-23 ">
+					<h3>Bootstrapped Parameters: {{numb_of_replicates}} replicates</h3> 
+				</div>
+					<b>	
+						<div class = "span-23 ">
+							<div class="span-3">Locus ID</div>
+							<div class="span-4">Diversity Parameter</div>
+							<div class="span-4">Bootstrapped Est.</div>
+							<div class="span-4">Variance</div>
+							<div class="span-4 last">Std. Error</div>
+						</div>
+					</b>
+						{% for row in bootstrap_est %}
+							<div class="span-23 ">
+								<div class="span-3">{{row|first}}</div>
+								<div class="span-4">{{row|slice:"1:2"|join:""}}</div>
+								{% for datum in row|slice:"2:4" %}
+									<div class="span-4">{{datum|floatformat:3}}</div>
+								{% endfor %}
+								<div class="span-4 last">{{row|slice:"4:5"|join:""|floatformat:3}}</div> 
+							</div>
+						{% endfor %}
+					<div class = "span-23 prepend-top">
+					Download results as a tab delimited file: 
+					<a href={{bootstrap_url}} type='text/csv'>[table]</a>
+					</div>
+			{% endifnotequal %}	
+			
+			
+		<hr />
+		<div class = "span-23 ">
+			<h3>Distance Matrices:</h3> 
+		</div>
+			<div class = "span-11 ">
+				<p>
+					There's no html output because the number of columns is dependent on the number
+					of loci, but a tab delimited file of pairwise distances may be downloaded here:
+					<a href={{matrix_url}} type='text/csv'>[table]</a>
+				</p>
+			</div>
+		<hr />
+		{% endif %}
+			<div class = 'span-11 colborder'>
+				<h4>General:</h4>
+				<p>
+				So you've read how <b>'Gst and it's relatives do not measure differentiation'</b> and you're
+				itching to see if that panmictic set of populations you've got lying around in an old GENPOP file
+				contains hidden diversity not identified by the 'usual suspects' (e.g., F<sub>ST</sub> or G<sub>ST</sub>).
+				Well, you've come to the right place!  Just follow the directions and admire your results.
+				</p>
+				<p class = 'error'>
+					Note: If you discover any please bugs please
+					send an <a href="mailto:ngcrawford@gmail.com?subject=I%20found%20a%20bug">email</a>. Likewise, if
+					there is something you'd like to see added let me know. Thanks.
+				</p>
+				
+				<div id = 'news-header'>				
+				<h4>Recent News:</h4>
+				<p class="notice">
+					Update (<i>5/6/09</i>), v1.2.2 :
+					Arlequin genotypic format is now accepted.
+					<span class = 'expand' id = 'expand-down'><i> --- <b>more</b></i><span class = 'ss_sprite ss_bullet_arrow_down'></span></span>		
+				</p>
+				</div>
+				<div id = 'news'>								{# java script looks for this <div> to determine what to hide #}
+				<p class="notice">
+					Update (<i>5/5/09</i>):
+					<br></br>									{# not ideal way to deal with HTML #}
+					<br></br>
+					Added javascript to ease clutter in the "Recent News" section. 
+					<br></br>
+					<br></br>
+					Genepop format now works with files formated with a single line of loci.  
+					Loci may be separated either by spaces alone or commas and spaces.   
+					<br></br>
+					<br></br>
+					It is no longer necessary to have all individuals within a population named the same.
+					The first individual in the population now lends its name to the
+					population.  
+	
+				</p>
+				<p class = 'notice'>
+					Update (<i>4/21/09</i>): You can now download distance matrices for each 
+					locus for G<sub>ST_est</sub>, G'<sub>ST_est</sub>, and D<sub>est</sub>.  You can also download each
+					table as a text file.  Files are time-stamped so you won't download a colleague's data set. I've also 
+					written an Arlequin format parser which I'll try to add tomorrow.
+	
+				</p>
+
+				<p class = 'notice'>
+					Update (<i>4/15/09</i>): Fixed a bug in the bootstrapping algorithm.
+				</p>
+				<p class = 'notice'>
+					Update (<i>4/14/09</i>): Fixed the Hedrick (G'<sub>ST_est</sub>) equation to account for multiple populations.  Thanks for
+					catching this Mark.
+				</p>
+				<p class = 'notice'>
+					Update (<i>4/13/09</i>): I've just included bootstrapping functionality!  I'll add a FAQ shortly with more 
+					details.
+				</p>
+				<p class = 'notice'>
+					Update (<i>4/10/09</i>): I've added formulae to calculate G<sub>ST_est</sub>, G'<sub>ST_est</sub>,
+					and D<sub>est</sub>. Note, that unlike similar software this program works with multiple loci.
+				</p>                                                        
+				                                                             
+				<p class = 'notice'>
+					Update (<i>4/8/09</i>): I've made some pretty substantial updates to the original back-end code.  The output is now
+					similar to <a href = 'http://www2.unil.ch/popgen/softwares/fstat.htm'>FSTAT</a> and follows 
+					the examples in Jost 2008 more accurately.
+					<span class = 'expand' id = 'expand-up'><i> --- <b>less</b></i><span class = 'ss_sprite ss_bullet_arrow_up'></span></span>
+				</p>
+				</div>
+				
+
+				<h4>Directions:</h4>
+				<p>
+				In the text box on the right 'cut-n-paste' the text of a GenePop or Arlequin file in the two or three digit 
+				allele format and click submit.  Missing genotypes can be coded as '000000', '0000', 'BADDNA', 
+				NA', '?', or '0.'
+				</p>
+				<h4>FAQ:</h4>
+				<p>
+				A user manual can be downloaded here: <a href="/web_media/images/manual_v1.pdf">[manual]</a>
+				</p>
+
+				<h4>How to Cite:</h4>
+				<p>
+					Crawford NG. 2009. SMOGD: Software for the Measurement of Genetic Diversity. Molecular Ecology Resources. Submitted.
+				</p>
+
+				<h4>Citations:</h4>
+				<p>
+				Aczél J, Daróczy Z. 1975. On measures of information and their characterizations. 
+				Mathematics in Science and Engineering, vol. 115, Academic Press, New York, 
+				San Francisco, London, 1975, xii + 234 pp.
+				<a href = "http://projecteuclid.org/euclid.bams/1183538665">[link to review]</a>
+				<span id = 'cite-expand' class = 'ss_sprite ss_bullet_arrow_down'></span>
+				</p>
+				
+				<div id ='citations'>
+				<p>
+				Hedrick, PW. 2005. A Standardized Genetic Differentiation Measure. Evolution 59(8), 1633-1638. <a href = 'http://www3.interscience.wiley.com/journal/118734790/abstract'>[link]</a>
+				</p>
+				<p>
+				Jost L. 2008. G<sub>ST</sub> and its relatives do not measure differentiation. Molecular Ecology 17(18), 4015-4026.
+				<a href = "http://www3.interscience.wiley.com/journal/121391819/abstract">[link]</a>
+				</p>
+				<p>
+				Nei M. 1973. Analysis of gene diversity in subdivided populations. Proceedings of the National Academy of Sciences, USA., 70(12, Pt 1), 3321-3323.
+				<a href = "http://www.pnas.org/content/70/12/3321.abstract">[link]</a>
+				</p>
+				<p> Nei M, Chesser RK. 1983. Estimation of fixation indices and gene diversities. Annals of Human Genetics. 47(3), 253-259 
+				<a href = 'http://www3.interscience.wiley.com/journal/120039466/abstract'>[link]</a>
+				</p>
+				<p>
+				Tsallis C, Bigatti E. 2004. Nonextensive statistical mechanics: A brief introduction. 
+				Continuum Mechanics and Thermodynamics, 16(3), 223-235. 
+				<a href = "http://www.springerlink.com/content/90e0lbqhycnwleke/">[link]</a>
+				</p>
+				</div>
+			</div>
+			
+			<div class = 'span-11 last'>
+				<form class = 'span-11 last' method="post" action="">
+					<fieldset>
+						<legend>Paste file here</legend>
+					<div class = 'span-11 last'>
+						{{form.genepop}}
+					</div>
+					<div class = 'span-11 last'>
+						<label>Bootstrap Replicates:</label>
+						{{form.numb_of_replicates}}
+					</div>
+					<div class = 'span-11 last'>
+						{% if form.numb_of_replicates.help_text %} <div class = 'quiet append-bottom'>{{ form.numb_of_replicates.help_text }}</div>{% endif %}
+						{% if form.numb_of_replicates.errors %}<div class="error">{{ form.numb_of_replicates.errors }}</div>{% endif %}	
+					</div>
+					<div class = 'span-5 last'>
+						<button type="submit" class="button positive">
+						<img src="/web_media/css/blueprint/plugins/buttons/icons/tick.png" alt=""/> Submit
+						</button>
+					</div>
+					</fieldset>
+				</form>
+			</div>
+			
+			<div class = 'span-11 last'>
+				<h4>Basic Parameters: assumes actual allele frequencies are known</h4>
+			</div>
+			<div class = 'span-9 last'>
+				<ul>
+					<li><b>n</b> = number of populations </li>
+					<li><b>D<sub>ST</sub></b> = absolute differentiation (Nei 1973) </li>
+					<li><b>G<sub>ST</sub></b> = relative differentiation (Nei 1973)</li>
+					<li><b>H<sub>ST</sub></b> = between-subpopulation heterozygosity (Aczel &amp; Daroczy 1975; Tsallis &amp; Brigatti 2004)</li>
+					<li><b>&#916;<sub>ST</sub></b> = between-subpopulation component of diversity, or the effective 
+						number of distinct subpopulations (Jost 2008)</li>
+					<li><b>D</b> = actual differentiation (Jost 2008)</li>
+					<li><b>H<sub>S</sub>/H<sub>T</sub></b> = proportion intra-population heterozygosity vs total heterozygosity (Jost 2008)</li>
+					<li><b>&#916;<sub>S</sub>/&#916;<sub>T</sub></b> = proportion of total diversity that is contained 
+						in the average subpopulation (Jost 2008)</li> 
+				</ul>
+				<p>
+					This is essentially Table 1 from Jost (2008), but don't report these values in a paper! 
+					The formulae assume that the allele frequencies are known exactly - that you genotyped every 
+					individual in the population.  You want to report the Estimated Parameters which account for 
+					small sample sizes.
+				</p>
+			</div>
+			<div class = 'span-11 last'>
+				<h4>Estimated Parameters: diversity measures for small sample sizes</h4>
+			</div>
+			<div class = 'span-9 last'>
+				<ul>
+					<li><b>&#209;</b> = harmonic mean of population sizes </li>
+					<li><b>H<sub>S_est</sub></b> = nearly unbiased estimator of within-subpopulation heterozygosty (Nei 1983)</li>
+					<li><b>H<sub>T_est</sub></b> = nearly unbiased estimator of total-subpopulation heterozygosty (Nei 1983)</li>
+					<li><b>H<sub>ST_est</sub></b> = nearly unbiased estimator of between-subpopulation heterozygosity (Nei 1983)</li>
+					<li><b>G<sub>ST_est</sub></b> = nearly unbiased estimator of relative differentiation (Nei 1983)</li>
+					<li><b>G'<sub>ST_est</sub></b> = standardized measure of genetic differentiation (Hedrick 2005)</li>
+					<li><b>D<sub>est</sub></b> = estimator of actual differentiation (Jost 2008)</li>
+				</ul>
+				<p>
+				These parameters incorporate the H<sub>S_est</sub> and H<sub>T_est</sub> nearly unbiased estimator's from Nei (1983) as
+				well as a few other modifications to the formulae (see Jost 2008, pg. 4022) They should better account for small sample sizes.
+				</p>
+				<p>
+				Note: it's possible to get negative values for G<sub>ST_est</sub>, G'<sub>ST_est</sub>, and D<sub>est</sub> if 
+				you are comparing populations with virtually identical gene frequencies. Try not to panic. You may just want to 
+				report these values as zero.
+				</p>
+			</div>
+		
+		<div class="span-24" id = "footer">
+			<hr />
+			<div class = "span-10  quiet">
+				Website and backend code created by <a href = "http://www.ngcrawford.com"> Nicholas Crawford </a>- 2009
+			</div>
+			<div class = 'span-5 quiet'>
+				CSS from <a href = "http://www.blueprintcss.org/">Blueprint.css</a>.
+			</div>
+			
+			<div class = 'span-5'>
+			<a href = 'http://www.webfaction.com'><img src='/web_media/images/blue-bg.png' alt="Hosted by Webfaction." title="Hosted by Webfaction."/></a>
+			</div>
+			<div class = "span-4 last">
+				<a href="http://www.djangoproject.com/"><img src="http://media.djangoproject.com/img/badges/djangoproject120x25_grey.gif" alt="A Django project." title="A Django project." /></a>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
