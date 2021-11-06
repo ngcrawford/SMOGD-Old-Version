@@ -1,6 +1,6 @@
 ## How to run locally
 
-First clone this repo, navigate the root directory, then run this command.
+First clone this repo, navigate the root directory, then do the following:
 
 1. Install the conda *smog-old* environment. Note that it's crucial that django be version 1.1.3.
 
