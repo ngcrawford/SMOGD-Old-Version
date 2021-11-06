@@ -8,6 +8,7 @@ Copyright (c) 2008 Boston Univeristy. All rights reserved.
 """
 
 from numpy import *
+import numpy as np
 from scipy import stats
 from copy import deepcopy
 import time
@@ -234,8 +235,8 @@ def mean_D_across_loci(results):
 	# H appoximated by 1/[(1/A)+var(D)(1/A)**3] 
 	
 	def approximate_hmean(dest_values):
-		A = stats.mean(dest_values)
-		varD = stats.var(dest_values)
+		A = np.mean(dest_values)
+		varD = np.var(dest_values)
 		h_mean = 1/((1/A)+(varD)*pow((1/A),3))
 		return h_mean
 	
@@ -368,8 +369,8 @@ def update_csv_file(header,data):
 	timestamp = time.localtime()
 	timestamp = "%s%s%s%s%s%s%s%s%s" % timestamp[:]  # (2009, 4, 17, 13, 57, 28, 4, 107, 1)
 	#filename = '/home/ngcrawford/webapps/web_media/temp_files/'+header+'_'+ timestamp +'.txt'
-	filename = '/Users/nick/Web_Design/django_templates/media/temp_files/'+header+'_'+ timestamp +'.csv'  # uncomment for online
-	filename = '/Users/nick/Web_Design/django_templates/media/temp_files/'+header+'_'+ timestamp +'.txt'	# local
+	filename = '/Users/alchemist/Projects/SMOGD-Old-Version/web_media/temp_files/'+header+'_'+ timestamp +'.csv'  # uncomment for online
+	filename = '/Users/alchemist/Projects/SMOGD-Old-Version/web_media/temp_files/'+header+'_'+ timestamp +'.txt'	# local
 	url = '/web_media/temp_files/'+header+'_'+ timestamp +'.txt'
 	data_writer = csv.writer(open(filename, 'w'), delimiter='\t', quotechar='|')
 	for row in data:

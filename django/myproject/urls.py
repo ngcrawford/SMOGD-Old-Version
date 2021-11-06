@@ -8,5 +8,7 @@ urlpatterns = patterns('',
 urlpatterns += patterns( '',
 	# path do media (e.g. images, style sheets, java script, etc...)
 	#(r'^web-media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/Users/nick/Web_Design/django_templates/media'}),
-	(r'^web_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/Users/nick/Web_Design/django_templates/media'}),
+	(r'^web_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/Users/alchemist/Projects/SMOGD-Old-Version/web_media'}),
 )
+
+
